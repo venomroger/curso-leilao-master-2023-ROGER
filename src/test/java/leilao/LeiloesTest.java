@@ -1,52 +1,53 @@
+/*Curso: Selenium: testes automatizados de aceitação em Java*/
+/*ROGER MACEDO DRUMOND-NTTDATA*/
 package leilao;
-
-import Login.LoginPage;
-
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
+import org.junit.Assert;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import Login.LoginPage;
+
 public class LeiloesTest {
 
     private LeiloesPage paginaDeLeiloes;
-    private CadastroLeilaoPage paginaDeCadastro;
+    private CadastroLeilaoPage paginaDeCadastroDeLeilao;
 
     @BeforeEach
-    public void beforeEach(){
+    public void beforeEach() {
         LoginPage paginaDeLogin = new LoginPage();
-        paginaDeLogin.preencheFormularioDeLogin("fulano", "pass");
-        this.paginaDeLeiloes = paginaDeLogin.efetuaLogin();
-        this.paginaDeCadastro = paginaDeLeiloes.carregarFormulario();
+        this.paginaDeLeiloes = paginaDeLogin.efetuarLogin("fulano", "pass");
+        this.paginaDeCadastroDeLeilao = paginaDeLeiloes.carregarFormulario();
     }
 
     @AfterEach
-    public void afterEach(){
+    public void afterEach() {
         this.paginaDeLeiloes.fechar();
+        this.paginaDeCadastroDeLeilao.fechar();
     }
+
     @Test
     public void deveriaCadastrarLeilao() {
         String hoje = LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-        String nome = "Leilao do dia" + hoje;
-        String valor = "500.00";
+        String nomeLeilao = "Leilao do dia " + hoje;
+        String valorInicial = "500.00";
 
+        this.paginaDeLeiloes = paginaDeCadastroDeLeilao.cadastrarLeilao(nomeLeilao, valorInicial, hoje);
 
-        this.paginaDeLeiloes = paginaDeCadastro.cadastrarLeilao(nome, valor, hoje);
-        Assertions.assertTrue(paginaDeLeiloes.isLeilaoCadastrado(nome, valor, hoje));
+        Assert.assertTrue(paginaDeLeiloes.isLeilaoCadastrado(nomeLeilao, valorInicial, hoje));
     }
 
     @Test
-    public void deveriaValidarCadastroDeLeilao() {
-        this.paginaDeLeiloes = paginaDeCadastro.cadastrarLeilao("","","");
-        Assert.assertFalse(this.paginaDeCadastro.isPaginaAtual());
-        Assert.assertTrue(this.paginaDeLeiloes.isPaginaAtual());
-        Assert.assertTrue(this.paginaDeCadastro.isPaginaDeValidacaoVisiveis());
-    }
+    public void deveriaExecutarValidacaoAoCadastrarLeilaoComDadosInvalidos() {
+        this.paginaDeLeiloes = paginaDeCadastroDeLeilao.cadastrarLeilao("", "", "");
 
+        Assert.assertFalse(paginaDeCadastroDeLeilao.isPaginaAtual());
+        Assert.assertTrue(paginaDeLeiloes.isPaginaAtual());
+        Assert.assertTrue(paginaDeCadastroDeLeilao.isMensagensDeValidacaoVisiveis());
+    }
 
 }
